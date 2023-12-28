@@ -7,9 +7,13 @@ dependencies:
   flutter:
     sdk: flutter
   fast_drift:
-    path: ../../fast_drift
+    git:
+      url: https://github.com/VovaIdzo/fast_drift
+      path: fast_drift
 
 dev_dependencies:
   fast_drift_gen:
-    path: ../
+    git:
+      url: https://github.com/VovaIdzo/fast_drift
+      path: fast_drift_gen
   build_runner: ^2.3.3
