@@ -136,7 +136,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
           && e.type != "String" && e.type != "String?"
           && e.type != "bool" && e.type != "bool?"
       ){
-        annotations += "@AsMap(${e.type.replaceAll(RegExp("[?<> ]"), "")}Converter)\n";
+        annotations += "@AsMap(${e.type.replaceAll(RegExp("[?<> ,]"), "")}Converter)\n";
       }
 
       return "$annotations abstract final $type $body";
