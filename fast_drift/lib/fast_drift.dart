@@ -16,7 +16,7 @@ class Id {
 }
 
 @Target({TargetKind.field})
-class JsonConverter {}
+class JsonConverter { const JsonConverter(); }
 
 
 @Target({TargetKind.field}) class AsId { const AsId(); }
