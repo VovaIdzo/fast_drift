@@ -15,7 +15,11 @@ class Id {
   final bool? autoincrement;
 }
 
+@Target({TargetKind.field})
+class JsonConverter {}
+
 
 @Target({TargetKind.field}) class AsId { const AsId(); }
 @Target({TargetKind.field}) class AsNullable { const AsNullable(); }
 @Target({TargetKind.field}) class AsMap { final Type type; const AsMap(this.type); }
+@Target({TargetKind.field}) class AsJsonConverter { const AsJsonConverter(); }
