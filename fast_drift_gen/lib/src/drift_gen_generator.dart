@@ -7,6 +7,7 @@ import 'package:source_gen/source_gen.dart'
 
 import 'field_info.dart';
 import 'helpers.dart';
+import 'package:collection/collection.dart';
 
 /// A `Generator` for `package:build_runner`
 class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
@@ -54,6 +55,18 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
       return "${e.name}: Value(item.${e.name})";
     }).join(",\n");
 
+    final jsonConverters = sortedFields.map((e){
+      if (e.idFieldAnnotation == null){
+        return null;
+      }
+      return '''
+  static TypeConverter<$className, String> converter = TypeConverter.json(
+    fromJson: (json) => $className.fromJson(json as Map<String, Object?>),
+    toJson: (item) => item.toJson(),
+  );
+      ''';
+    }).whereNotNull().join("\n");
+
     final columns = sortedFields.map((e){
       final body = "${e.name};";
 
@@ -67,14 +80,16 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
       }
 
       var annotations = "";
-      if (e.fieldAnnotation != null){
+      if (e.idFieldAnnotation != null){
         annotations += "@AsId()\n";
       }
       if (e.nullable){
         annotations += "@AsNullable()\n";
       }
 
-      if (e.type != "int" && e.type != "int?"
+      if (e.jsonConverterFieldAnnotation != null){
+        annotations += "@AsJsonConverter()\n";
+      } else if (e.type != "int" && e.type != "int?"
           && e.type != "String" && e.type != "String?"
           && e.type != "bool" && e.type != "bool?"
       ){
@@ -101,6 +116,7 @@ abstract mixin class ${className}FastDrift implements Insertable<${className}> {
 
 abstract mixin class ${className}FastDriftTableColumns {
   $columns
+  $jsonConverters
 }    
    
     ''';

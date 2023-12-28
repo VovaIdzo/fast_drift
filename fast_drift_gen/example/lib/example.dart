@@ -20,6 +20,7 @@ class SimpleObject {
   final int id;
   final int? intValue;
   final String? stringValue;
+  @JsonConverter()
   final CustomObj? customObjValue;
 
   String get text => "";

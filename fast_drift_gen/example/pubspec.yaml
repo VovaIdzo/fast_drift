@@ -12,8 +12,11 @@ dependencies:
       path: fast_drift
 
 dev_dependencies:
+
   fast_drift_gen:
-    git:
-      url: https://github.com/VovaIdzo/fast_drift
-      path: fast_drift_gen
+    path: ../
+#  fast_drift_gen:
+#    git:
+#      url: https://github.com/VovaIdzo/fast_drift
+#      path: fast_drift_gen
   build_runner: ^2.3.3

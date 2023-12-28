@@ -4,6 +4,7 @@ import 'package:analyzer/dart/element/element.dart'
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:fast_drift/fast_drift.dart';
 import 'package:fast_drift_gen/src/fast_drift_id_field_annotation.dart';
+import 'package:fast_drift_gen/src/fast_drift_json_field_annotation.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Class field info relevant for code generation.
@@ -23,33 +24,30 @@ class FieldInfo {
   bool get isDynamic => type == "dynamic";
 }
 
-/// Represents a single class field with the additional metadata needed for code generation.
 class ConstructorParameterInfo extends FieldInfo {
   ConstructorParameterInfo(
       ParameterElement element,
       ClassElement classElement, {
         required this.isPositioned,
-      })  : fieldAnnotation = _readFieldAnnotation(element, classElement),
+      })  : idFieldAnnotation = _readIdFieldAnnotation(element, classElement),
         classFieldInfo = _classFieldInfo(element.name, classElement),
+        jsonConverterFieldAnnotation = _readJsonConverterFieldAnnotation(element, classElement),
         super(
         name: element.name,
         nullable: element.type.nullabilitySuffix != NullabilitySuffix.none,
         type: element.type.getDisplayString(withNullability: true),
       );
 
-  /// Annotation provided by the user with `CopyWithField`.
-  final FastDriftIdFieldAnnotation? fieldAnnotation;
+  final FastDriftIdFieldAnnotation? idFieldAnnotation;
+  final FastDriftJsonConverterFieldAnnotation? jsonConverterFieldAnnotation;
 
-  /// True if the field is positioned in the constructor
   final bool isPositioned;
 
-  /// Info relevant to the given field taken from the class itself, as contrary to the constructor parameter.
-  /// If `null`, the field with the given name wasn't found on the class.
   final FieldInfo? classFieldInfo;
 
   @override
   String toString() {
-    return 'type:$type name:$name fieldAnnotation:$fieldAnnotation nullable:$nullable';
+    return 'type:$type name:$name fieldAnnotation:$idFieldAnnotation nullable:$nullable';
   }
 
   /// Returns the field info for the constructor parameter in the relevant class.
@@ -69,8 +67,7 @@ class ConstructorParameterInfo extends FieldInfo {
     );
   }
 
-  /// Restores the `CopyWithField` annotation provided by the user.
-  static FastDriftIdFieldAnnotation? _readFieldAnnotation(
+  static FastDriftIdFieldAnnotation? _readIdFieldAnnotation(
       ParameterElement element,
       ClassElement classElement,
       ) {
@@ -91,5 +88,23 @@ class ConstructorParameterInfo extends FieldInfo {
     return FastDriftIdFieldAnnotation(
       autoincrement: immutable ?? false,
     );
+  }
+
+  static FastDriftJsonConverterFieldAnnotation? _readJsonConverterFieldAnnotation(
+      ParameterElement element,
+      ClassElement classElement,
+      ) {
+    final fieldElement = classElement.getField(element.name);
+    if (fieldElement is! FieldElement) {
+      return null;
+    }
+
+    const checker = TypeChecker.fromRuntime(JsonConverter);
+    final annotation = checker.firstAnnotationOf(fieldElement);
+    if (annotation is! DartObject) {
+      return null;
+    }
+
+    return FastDriftJsonConverterFieldAnnotation();
   }
 }
