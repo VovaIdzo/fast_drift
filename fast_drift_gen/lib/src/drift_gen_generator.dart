@@ -60,28 +60,53 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
         return null;
       }
 
-      final pureType = e.type
-          .replaceAll("?", "")
-          .replaceAll("List", "")
-          .replaceAll("<", "")
-          .replaceAll(">", "");
-
+      var pureType = e.type;
       final isListConverter = e.type.startsWith("List<");
+      final className = e.type.replaceAll(RegExp("[?<>]"), "");
+      final driftType = e.nullable ? "String?" : "String";
 
       if (isListConverter){
+        pureType = e.type.replaceAll(RegExp("[?<>]"), "").replaceAll("List", "");
+
         return '''
-    static TypeConverter<${e.type}, String> ${e.name}ListConverter = TypeConverter.json(
-      fromJson: (json) => (json as List).map((e) => e.fromJson(json as Map<String, Object?>) as $pureType).toList(), 
-      toJson: (item) => item?.map((e) => e.toJson()).toList(),
-    );
+class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
+  const ${className}Converter();
+
+  @override
+  ${e.type} fromSql($driftType fromDb) {
+    ${e.nullable ? "if (fromDb == null) return null;" : ""}
+   
+    return (jsonDecode(fromDb) as List).map((obj) => $pureType.fromJson(obj)).toList();
+  }
+
+  @override
+  $driftType toSql(${e.type} value) {
+    ${e.nullable ? "if (value == null) return null;" : ""}
+
+    return jsonEncode(value.map((e) => e.toJson()).toString());
+  }
+}
         ''';
       }
 
       return '''
-  static TypeConverter<$pureType, String> ${e.name}Converter = TypeConverter.json(
-    fromJson: (json) => $pureType.fromJson(json as Map<String, Object?>),
-    toJson: (item) => item?.toJson(),
-  );
+class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
+  const ${className}Converter();
+
+  @override
+  ${e.type} fromSql($driftType fromDb) {
+    ${e.nullable ? "if (fromDb == null) return null;" : ""}
+   
+    return $className.fromJson(jsonDecode(fromDb));
+  }
+
+  @override
+  $driftType toSql(${e.type} value) {
+    ${e.nullable ? "if (value == null) return null;" : ""}
+
+    return jsonEncode(e.toJson());
+  }
+}      
       ''';
     }).whereNotNull().join("\n");
 
@@ -134,9 +159,9 @@ abstract mixin class ${className}FastDrift implements Insertable<${className}> {
 
 abstract mixin class ${className}FastDriftTableColumns {
   $columns
-  $jsonConverters
 }    
    
+$jsonConverters
     ''';
   }
 }

@@ -183,7 +183,7 @@ packages:
     description:
       path: fast_drift_gen
       ref: HEAD
-      resolved-ref: "5c134bc3dc222bdb7030fdc4ef60cd7dfde6e517"
+      resolved-ref: "633b619e3965b84b87f9e86abac4d65c7df230fb"
       url: "https://github.com/VovaIdzo/fast_drift"
     source: git
     version: "1.1.1"
