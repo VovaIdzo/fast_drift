@@ -2,7 +2,7 @@
 import 'package:fast_drift/fast_drift.dart';
 
 /// The internal representation of parameters entered by the library's user.
-class FastDriftIdFieldAnnotation implements Id {
+class FastDriftIdFieldAnnotation implements IdToDrift {
   const FastDriftIdFieldAnnotation({required this.autoincrement});
 
   const FastDriftIdFieldAnnotation.defaults() : this(autoincrement: false);

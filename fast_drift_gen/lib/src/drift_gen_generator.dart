@@ -56,12 +56,15 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
     }).join(",\n");
 
     final jsonConverters = sortedFields.map((e){
-      if (e.idFieldAnnotation == null){
+      if (e.jsonConverterFieldAnnotation == null){
         return null;
       }
+
+      final type = e.type.replaceAll("?", "");
+
       return '''
-  static TypeConverter<$className, String> converter = TypeConverter.json(
-    fromJson: (json) => $className.fromJson(json as Map<String, Object?>),
+  static TypeConverter<$type, String> ${e.name}Converter = TypeConverter.json(
+    fromJson: (json) => $type.fromJson(json as Map<String, Object?>),
     toJson: (item) => item.toJson(),
   );
       ''';

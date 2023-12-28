@@ -190,10 +190,10 @@ packages:
     description:
       path: fast_drift
       ref: HEAD
-      resolved-ref: b56b0d23180d2b83fbc241f74ebcaf698dcd86ca
+      resolved-ref: b0bc214626534adcae14ded95fcdacfed7b2d272
       url: "https://github.com/VovaIdzo/fast_drift"
     source: git
-    version: "1.1.0"
+    version: "1.1.1"
   ffi:
     dependency: transitive
     description:

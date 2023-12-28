@@ -16,11 +16,11 @@ class SimpleObject {
     this.customObjValue,
   });
 
-  @Id(autoincrement: false)
+  @IdToDrift()
   final int id;
   final int? intValue;
   final String? stringValue;
-  @JsonConverter()
+  @JsonToDrift()
   final CustomObj? customObjValue;
 
   String get text => "";

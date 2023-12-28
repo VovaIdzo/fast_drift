@@ -76,7 +76,7 @@ class ConstructorParameterInfo extends FieldInfo {
       return null;
     }
 
-    const checker = TypeChecker.fromRuntime(Id);
+    const checker = TypeChecker.fromRuntime(IdToDrift);
     final annotation = checker.firstAnnotationOf(fieldElement);
     if (annotation is! DartObject) {
       return null;
@@ -99,7 +99,7 @@ class ConstructorParameterInfo extends FieldInfo {
       return null;
     }
 
-    const checker = TypeChecker.fromRuntime(JsonConverter);
+    const checker = TypeChecker.fromRuntime(JsonToDrift);
     final annotation = checker.firstAnnotationOf(fieldElement);
     if (annotation is! DartObject) {
       return null;
