@@ -13,7 +13,8 @@ class SimpleObject {
     required this.id,
     this.intValue,
     this.stringValue,
-    this.customObjValue,
+    this.list,
+    this.obj,
   });
 
   @IdToDrift()
@@ -21,7 +22,9 @@ class SimpleObject {
   final int? intValue;
   final String? stringValue;
   @JsonToDrift()
-  final CustomObj? customObjValue;
+  final List<CustomObj>? list;
+  @JsonToDrift()
+  final CustomObj? obj;
 
   String get text => "";
 }

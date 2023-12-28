@@ -60,12 +60,27 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
         return null;
       }
 
-      final type = e.type.replaceAll("?", "");
+      final pureType = e.type
+          .replaceAll("?", "")
+          .replaceAll("List", "")
+          .replaceAll("<", "")
+          .replaceAll(">", "");
+
+      final isListConverter = e.type.startsWith("List<");
+
+      if (isListConverter){
+        return '''
+    static TypeConverter<${e.type}, String> ${e.name}ListConverter = TypeConverter.json(
+      fromJson: (json) => (json as List).map((e) => e.fromJson(json as Map<String, Object?>) as $pureType).toList(), 
+      toJson: (item) => item?.map((e) => e.toJson()).toList(),
+    );
+        ''';
+      }
 
       return '''
-  static TypeConverter<$type, String> ${e.name}Converter = TypeConverter.json(
-    fromJson: (json) => $type.fromJson(json as Map<String, Object?>),
-    toJson: (item) => item.toJson(),
+  static TypeConverter<$pureType, String> ${e.name}Converter = TypeConverter.json(
+    fromJson: (json) => $pureType.fromJson(json as Map<String, Object?>),
+    toJson: (item) => item?.toJson(),
   );
       ''';
     }).whereNotNull().join("\n");
