@@ -62,11 +62,11 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
 
       var pureType = e.type;
       final isListConverter = e.type.startsWith("List<");
-      final className = e.type.replaceAll(RegExp("[?<>]"), "");
+      final className = e.type.replaceAll(RegExp("[?<> ]"), "");
       final driftType = e.nullable ? "String?" : "String";
 
       if (isListConverter){
-        pureType = e.type.replaceAll(RegExp("[?<>]"), "").replaceAll("List", "");
+        pureType = e.type.replaceAll(RegExp("[?<> ]"), "").replaceAll("List", "");
 
         return '''
 class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
@@ -136,7 +136,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
           && e.type != "String" && e.type != "String?"
           && e.type != "bool" && e.type != "bool?"
       ){
-        annotations += "@AsMap(${e.type.replaceAll(RegExp("[?<>]"), "")}Converter)\n";
+        annotations += "@AsMap(${e.type.replaceAll(RegExp("[?<> ]"), "")}Converter)\n";
       }
 
       return "$annotations abstract final $type $body";
