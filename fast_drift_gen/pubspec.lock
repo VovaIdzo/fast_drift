@@ -188,9 +188,11 @@ packages:
   fast_drift:
     dependency: "direct main"
     description:
-      path: "../fast_drift"
-      relative: true
-    source: path
+      path: fast_drift
+      ref: HEAD
+      resolved-ref: cdf2782595147893498948755b09002826bd19b9
+      url: "https://github.com/VovaIdzo/fast_drift"
+    source: git
     version: "1.0.0"
   ffi:
     dependency: transitive

@@ -1,7 +1,5 @@
-/// Provides `CopyWith` annotation class used by [copy_with_extension_gen](https://pub.dev/packages/copy_with_extension_gen).
 library fast_drift;
 
-import 'package:drift/drift.dart';
 import 'package:meta/meta_meta.dart';
 
 @Target({TargetKind.classType})

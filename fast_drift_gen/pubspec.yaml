@@ -11,7 +11,9 @@ dependencies:
   source_gen: ^1.0.0
   drift: ^2.14.0
   fast_drift:
-    path: ../fast_drift
+    git:
+      url: https://github.com/VovaIdzo/fast_drift
+      path: fast_drift
   meta: ^1.8.0
 
 dev_dependencies:
