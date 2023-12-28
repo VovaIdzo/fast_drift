@@ -9,14 +9,14 @@ class FastDrift {
 }
 
 @Target({TargetKind.field})
-class Id {
-  const Id({this.autoincrement});
+class IdToDrift {
+  const IdToDrift({this.autoincrement});
 
   final bool? autoincrement;
 }
 
 @Target({TargetKind.field})
-class JsonConverter { const JsonConverter(); }
+class JsonToDrift { const JsonToDrift(); }
 
 
 @Target({TargetKind.field}) class AsId { const AsId(); }

@@ -1,5 +1,5 @@
 name: fast_drift_gen
-version: 1.1.0
+version: 1.1.1
 description: Automatically generating `Companion` and `Table` classes with `@DriftGen()` annotation.
 
 environment:
