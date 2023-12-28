@@ -1,0 +1,13 @@
+name: fast_drift
+version: 1.0.0
+description: Automatically generating `Companion` and `Table` classes with `@DriftGen()` annotation.
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  meta: ^1.8.0
+  drift: ^2.14.0
+
+dev_dependencies:
+  flutter_lints: ^2.0.1

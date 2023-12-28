@@ -1,0 +1,15 @@
+name: dummy_yaml
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  fast_drift:
+    path: ../../fast_drift
+
+dev_dependencies:
+  fast_drift_gen:
+    path: ../
+  build_runner: ^2.3.3
