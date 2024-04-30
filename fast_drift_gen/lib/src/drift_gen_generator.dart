@@ -136,6 +136,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
         annotations += "@AsJsonConverter()\n";
       } else if (e.type != "int" && e.type != "int?"
           && e.type != "String" && e.type != "String?"
+          && e.type != "DateTime" && e.type != "DateTime?"
           && e.type != "bool" && e.type != "bool?"
       ){
         annotations += "@AsMap(${e.type.replaceAll(RegExp("[?<> ,]"), "")}Converter)\n";
