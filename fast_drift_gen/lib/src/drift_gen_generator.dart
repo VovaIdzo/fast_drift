@@ -116,6 +116,8 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
       var type = "";
       if (e.type == "int" || e.type == "int?"){
         type = "IntColumn";
+      } else if (e.type == "DateTime" || e.type == "DateTime?"){
+        type = "DateTimeColumn";
       } else if (e.type == "bool" || e.type == "bool?"){
         type = "BoolColumn";
       } else {

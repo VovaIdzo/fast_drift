@@ -1,7 +1,7 @@
 name: dummy_yaml
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.2.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -19,4 +19,4 @@ dev_dependencies:
     git:
       url: https://github.com/VovaIdzo/fast_drift
       path: fast_drift_gen
-  build_runner: ^2.3.3
+  build_runner: ^2.4.8
