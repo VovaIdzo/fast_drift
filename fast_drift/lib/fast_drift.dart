@@ -18,6 +18,9 @@ class IdToDrift {
 @Target({TargetKind.field})
 class JsonToDrift { const JsonToDrift(); }
 
+@Target({TargetKind.field})
+class IgnoreToDrift { const IgnoreToDrift(); }
+
 
 @Target({TargetKind.field}) class AsId { const AsId(); }
 @Target({TargetKind.field}) class AsNullable { const AsNullable(); }
