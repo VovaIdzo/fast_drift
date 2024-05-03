@@ -52,8 +52,12 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
   String _buildTemplate(String className, List<ConstructorParameterInfo> sortedFields){
 
     final companion = sortedFields.map((e){
+      if (e.ignoreAnnotation != null){
+        return null;
+      }
+
       return "${e.name}: Value(item.${e.name})";
-    }).join(",\n");
+    }).whereNotNull().join(",\n");
 
     final jsonConverters = sortedFields.map((e){
       if (e.jsonConverterFieldAnnotation == null){
