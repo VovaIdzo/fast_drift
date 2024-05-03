@@ -4,6 +4,7 @@ import 'package:analyzer/dart/element/element.dart'
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:fast_drift/fast_drift.dart';
 import 'package:fast_drift_gen/src/fast_drift_id_field_annotation.dart';
+import 'package:fast_drift_gen/src/fast_drift_ignore_field_annotation.dart';
 import 'package:fast_drift_gen/src/fast_drift_json_field_annotation.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
@@ -31,6 +32,7 @@ class ConstructorParameterInfo extends FieldInfo {
         required this.isPositioned,
       })  : idFieldAnnotation = _readIdFieldAnnotation(element, classElement),
         classFieldInfo = _classFieldInfo(element.name, classElement),
+        ignoreAnnotation = _readIgnoreFieldAnnotation(element, classElement),
         jsonConverterFieldAnnotation = _readJsonConverterFieldAnnotation(element, classElement),
         super(
         name: element.name,
@@ -40,6 +42,7 @@ class ConstructorParameterInfo extends FieldInfo {
 
   final FastDriftIdFieldAnnotation? idFieldAnnotation;
   final FastDriftJsonConverterFieldAnnotation? jsonConverterFieldAnnotation;
+  final FastDriftIgnoreFieldAnnotation? ignoreAnnotation;
 
   final bool isPositioned;
 
@@ -88,6 +91,24 @@ class ConstructorParameterInfo extends FieldInfo {
     return FastDriftIdFieldAnnotation(
       autoincrement: immutable ?? false,
     );
+  }
+
+  static FastDriftIgnoreFieldAnnotation? _readIgnoreFieldAnnotation(
+      ParameterElement element,
+      ClassElement classElement,
+      ) {
+    final fieldElement = classElement.getField(element.name);
+    if (fieldElement is! FieldElement) {
+      return null;
+    }
+
+    const checker = TypeChecker.fromRuntime(IgnoreToDrift);
+    final annotation = checker.firstAnnotationOf(fieldElement);
+    if (annotation is! DartObject) {
+      return null;
+    }
+
+    return const FastDriftIgnoreFieldAnnotation();
   }
 
   static FastDriftJsonConverterFieldAnnotation? _readJsonConverterFieldAnnotation(

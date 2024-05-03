@@ -111,6 +111,10 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
     }).whereNotNull().join("\n");
 
     final columns = sortedFields.map((e){
+      if (e.ignoreAnnotation != null){
+        return null;
+      }
+
       final body = "${e.name};";
 
       var type = "";
@@ -143,7 +147,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
       }
 
       return "$annotations abstract final $type $body";
-    }).join("\n");
+    }).whereNotNull().join("\n");
 
     return '''
     
