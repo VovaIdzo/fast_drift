@@ -5,7 +5,13 @@ import 'package:meta/meta_meta.dart';
 @Target({TargetKind.classType})
 class FastDrift {
   const FastDrift();
+}
 
+@Target({TargetKind.classType})
+class FastDriftTable extends FastDrift {
+  final Type type;
+
+  const FastDriftTable(this.type);
 }
 
 @Target({TargetKind.field})
@@ -16,13 +22,32 @@ class IdToDrift {
 }
 
 @Target({TargetKind.field})
-class JsonToDrift { const JsonToDrift(); }
+class JsonToDrift {
+  const JsonToDrift();
+}
 
 @Target({TargetKind.field})
-class IgnoreToDrift { const IgnoreToDrift(); }
+class IgnoreToDrift {
+  const IgnoreToDrift();
+}
 
+@Target({TargetKind.field})
+class AsId {
+  const AsId();
+}
 
-@Target({TargetKind.field}) class AsId { const AsId(); }
-@Target({TargetKind.field}) class AsNullable { const AsNullable(); }
-@Target({TargetKind.field}) class AsMap { final Type type; const AsMap(this.type); }
-@Target({TargetKind.field}) class AsJsonConverter { const AsJsonConverter(); }
+@Target({TargetKind.field})
+class AsNullable {
+  const AsNullable();
+}
+
+@Target({TargetKind.field})
+class AsMap {
+  final Type type;
+  const AsMap(this.type);
+}
+
+@Target({TargetKind.field})
+class AsJsonConverter {
+  const AsJsonConverter();
+}

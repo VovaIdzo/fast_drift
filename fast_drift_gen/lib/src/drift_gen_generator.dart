@@ -2,6 +2,7 @@ import 'package:analyzer/dart/element/element.dart' show ClassElement, Element;
 import 'package:build/build.dart' show BuildStep;
 import 'package:fast_drift/fast_drift.dart';
 import 'package:collection/collection.dart';
+import 'package:fast_drift_gen/src/fast_drift_table_annotation.dart';
 import 'package:source_gen/source_gen.dart'
     show ConstantReader, GeneratorForAnnotation, InvalidGenerationSourceError;
 
@@ -15,20 +16,23 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
 
   @override
   String generateForAnnotatedElement(
-      Element element,
-      ConstantReader annotation,
-      BuildStep buildStep,
-      ) {
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
-        'Only classes can be annotated with "CopyWith". "$element" is not a ClassElement.',
+        'Only classes can be annotated with "FastDrift". "$element" is not a ClassElement.',
         element: element,
       );
     }
 
-    final ClassElement classElement = element;
+    ClassElement classElement = element;
     final privacyPrefix = element.isPrivate ? "_" : "";
     final classAnnotation = readClassAnnotation(annotation);
+    if (classAnnotation is FastDriftTableAnnotation) {
+      classElement = classAnnotation.type.element! as ClassElement;
+    }
     final sortedFields = sortedConstructorFields(classElement, null);
     final typeParametersAnnotation = typeParametersString(classElement, false);
     final typeParametersNames = typeParametersString(classElement, true);
@@ -48,31 +52,35 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
     return _buildTemplate(classElement.name, sortedFields);
   }
 
+  String _buildTemplate(
+      String className, List<ConstructorParameterInfo> sortedFields) {
+    final companion = sortedFields
+        .map((e) {
+          if (e.ignoreAnnotation != null) {
+            return null;
+          }
 
-  String _buildTemplate(String className, List<ConstructorParameterInfo> sortedFields){
+          return "${e.name}: Value(item.${e.name})";
+        })
+        .whereNotNull()
+        .join(",\n");
 
-    final companion = sortedFields.map((e){
-      if (e.ignoreAnnotation != null){
-        return null;
-      }
+    final jsonConverters = sortedFields
+        .map((e) {
+          if (e.jsonConverterFieldAnnotation == null) {
+            return null;
+          }
 
-      return "${e.name}: Value(item.${e.name})";
-    }).whereNotNull().join(",\n");
+          var pureType = e.type;
+          final isListConverter = e.type.startsWith("List<");
+          final className = e.type.replaceAll(RegExp("[?<> ]"), "");
+          final driftType = e.nullable ? "String?" : "String";
 
-    final jsonConverters = sortedFields.map((e){
-      if (e.jsonConverterFieldAnnotation == null){
-        return null;
-      }
+          if (isListConverter) {
+            pureType =
+                e.type.replaceAll(RegExp("[?<> ]"), "").replaceAll("List", "");
 
-      var pureType = e.type;
-      final isListConverter = e.type.startsWith("List<");
-      final className = e.type.replaceAll(RegExp("[?<> ]"), "");
-      final driftType = e.nullable ? "String?" : "String";
-
-      if (isListConverter){
-        pureType = e.type.replaceAll(RegExp("[?<> ]"), "").replaceAll("List", "");
-
-        return '''
+            return '''
 class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
   const ${className}Converter();
 
@@ -91,9 +99,9 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
   }
 }
         ''';
-      }
+          }
 
-      return '''
+          return '''
 class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
   const ${className}Converter();
 
@@ -112,46 +120,55 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
   }
 }      
       ''';
-    }).whereNotNull().join("\n");
+        })
+        .whereNotNull()
+        .join("\n");
 
-    final columns = sortedFields.map((e){
-      if (e.ignoreAnnotation != null){
-        return null;
-      }
+    final columns = sortedFields
+        .map((e) {
+          if (e.ignoreAnnotation != null) {
+            return null;
+          }
 
-      final body = "${e.name};";
+          final body = "${e.name};";
 
-      var type = "";
-      if (e.type == "int" || e.type == "int?"){
-        type = "IntColumn";
-      } else if (e.type == "DateTime" || e.type == "DateTime?"){
-        type = "DateTimeColumn";
-      } else if (e.type == "bool" || e.type == "bool?"){
-        type = "BoolColumn";
-      } else {
-        type = "TextColumn";
-      }
+          var type = "";
+          if (e.type == "int" || e.type == "int?") {
+            type = "IntColumn";
+          } else if (e.type == "DateTime" || e.type == "DateTime?") {
+            type = "DateTimeColumn";
+          } else if (e.type == "bool" || e.type == "bool?") {
+            type = "BoolColumn";
+          } else {
+            type = "TextColumn";
+          }
 
-      var annotations = "";
-      if (e.idFieldAnnotation != null){
-        annotations += "@AsId()\n";
-      }
-      if (e.nullable){
-        annotations += "@AsNullable()\n";
-      }
+          var annotations = "";
+          if (e.idFieldAnnotation != null) {
+            annotations += "@AsId()\n";
+          }
+          if (e.nullable) {
+            annotations += "@AsNullable()\n";
+          }
 
-      if (e.jsonConverterFieldAnnotation != null){
-        annotations += "@AsJsonConverter()\n";
-      } else if (e.type != "int" && e.type != "int?"
-          && e.type != "String" && e.type != "String?"
-          && e.type != "DateTime" && e.type != "DateTime?"
-          && e.type != "bool" && e.type != "bool?"
-      ){
-        annotations += "@AsMap(${e.type.replaceAll(RegExp("[?<> ,]"), "")}Converter)\n";
-      }
+          if (e.jsonConverterFieldAnnotation != null) {
+            annotations += "@AsJsonConverter()\n";
+          } else if (e.type != "int" &&
+              e.type != "int?" &&
+              e.type != "String" &&
+              e.type != "String?" &&
+              e.type != "DateTime" &&
+              e.type != "DateTime?" &&
+              e.type != "bool" &&
+              e.type != "bool?") {
+            annotations +=
+                "@AsMap(${e.type.replaceAll(RegExp("[?<> ,]"), "")}Converter)\n";
+          }
 
-      return "$annotations abstract final $type $body";
-    }).whereNotNull().join("\n");
+          return "$annotations abstract final $type $body";
+        })
+        .whereNotNull()
+        .join("\n");
 
     return '''
     
@@ -167,10 +184,25 @@ abstract mixin class ${className}FastDrift implements Insertable<${className}> {
   
 }
 
-
 abstract mixin class ${className}FastDriftTableColumns {
   $columns
-}    
+}  
+
+extension ${className}X on ${className} {
+  Insertable<${className}> toInsertable([bool nullToAbsent = false]) {
+    final item = this as ${className};
+    
+    return RawValuesInsertable(${className}TableCompanion(
+      $companion
+    ).toColumns(nullToAbsent));
+  }
+}
+
+extension ${className}ListX on List<${className}> {
+  Iterable<Insertable<${className}>> toInsertable([bool nullToAbsent = false]) {
+    return map((e) => e.toInsertable(nullToAbsent));
+  }
+}  
    
 $jsonConverters
     ''';

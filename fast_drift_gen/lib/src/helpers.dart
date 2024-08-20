@@ -1,16 +1,18 @@
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
+import 'package:fast_drift/fast_drift.dart';
 import 'package:fast_drift_gen/src/fast_drift_annotation.dart';
+import 'package:fast_drift_gen/src/fast_drift_table_annotation.dart';
 import 'package:fast_drift_gen/src/field_info.dart';
 import 'package:source_gen/source_gen.dart'
-    show ConstantReader, InvalidGenerationSourceError;
+    show ConstantReader, InvalidGenerationSourceError, TypeChecker;
 
 /// Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
 /// The resulting array is sorted by the field name. `Throws` on error.
 List<ConstructorParameterInfo> sortedConstructorFields(
-    ClassElement element,
-    String? constructor,
-    ) {
+  ClassElement element,
+  String? constructor,
+) {
   final targetConstructor = constructor != null
       ? element.getNamedConstructor(constructor)
       : element.unnamedConstructor;
@@ -54,9 +56,16 @@ List<ConstructorParameterInfo> sortedConstructorFields(
 
 /// Restores the `CopyWith` annotation provided by the user.
 FastDriftAnnotation readClassAnnotation(
-    ConstantReader reader,
-    ) {
-  // final constructor = reader.peek('constructor')?.stringValue;
+  ConstantReader reader,
+) {
+  const tableChecker = TypeChecker.fromRuntime(FastDriftTable);
+  if (reader.instanceOf(tableChecker)) {
+    final type = reader.peek('type')?.typeValue;
+    if (type == null) {
+      return FastDriftAnnotation();
+    }
+    return FastDriftTableAnnotation(type);
+  }
 
   return FastDriftAnnotation();
 }
@@ -70,7 +79,7 @@ String typeParametersString(ClassElement classElement, bool nameOnly) {
   final names = classElement.typeParameters
       .map(
         (e) => nameOnly ? e.name : e.getDisplayString(withNullability: true),
-  )
+      )
       .join(',');
   if (names.isNotEmpty) {
     return '<$names>';
