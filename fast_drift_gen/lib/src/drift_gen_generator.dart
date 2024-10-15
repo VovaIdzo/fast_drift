@@ -130,7 +130,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
             return null;
           }
 
-          final body = "${e.name}";
+          final body = "${e.name};";
 
           var type = "";
           if (e.type == "int" || e.type == "int?") {
@@ -143,31 +143,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
             type = "TextColumn";
           }
 
-
-          final builder = StringBuffer();
-          builder.write("$type get $body => ");
-          switch (e.type){
-            case "int":
-              builder.write("integer()");
-            case "int?":
-              builder.write("integer().nullable()");
-            case "String":
-              builder.write("text()");
-            case "String?":
-              builder.write("text().nullable()");
-            case "DateTime":
-              builder.write("dateTime()");
-            case "DateTime?":
-              builder.write("dateTime().nullable()");
-            case "bool":
-              builder.write("boolean()");
-            case "bool?":
-              builder.write("boolean().nullable()");
-            default:
-              builder.write("text()");
-          }
-          builder.write('();\n');
-          return builder;
+          return "abstract final $type $body";
         })
         .whereNotNull()
         .join("\n");
