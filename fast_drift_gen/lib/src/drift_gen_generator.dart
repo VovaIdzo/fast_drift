@@ -130,7 +130,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
             return null;
           }
 
-          final body = "${e.name};";
+          final body = "${e.name}";
 
           var type = "";
           if (e.type == "int" || e.type == "int?") {
@@ -143,29 +143,31 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
             type = "TextColumn";
           }
 
-          var annotations = "";
-          if (e.idFieldAnnotation != null) {
-            annotations += "@AsId()\n";
-          }
-          if (e.nullable) {
-            annotations += "@AsNullable()\n";
-          }
 
-          if (e.jsonConverterFieldAnnotation != null) {
-            annotations += "@AsJsonConverter()\n";
-          } else if (e.type != "int" &&
-              e.type != "int?" &&
-              e.type != "String" &&
-              e.type != "String?" &&
-              e.type != "DateTime" &&
-              e.type != "DateTime?" &&
-              e.type != "bool" &&
-              e.type != "bool?") {
-            annotations +=
-                "@AsMap(${e.type.replaceAll(RegExp("[?<> ,]"), "")}Converter)\n";
+          final builder = StringBuffer();
+          builder.write("$type get $body => ");
+          switch (e.type){
+            case "int":
+              builder.write("integer()");
+            case "int?":
+              builder.write("integer().nullable()");
+            case "String":
+              builder.write("text()");
+            case "String?":
+              builder.write("text().nullable()");
+            case "DateTime":
+              builder.write("dateTime()");
+            case "DateTime?":
+              builder.write("dateTime().nullable()");
+            case "bool":
+              builder.write("boolean()");
+            case "bool?":
+              builder.write("boolean().nullable()");
+            default:
+              builder.write("text()");
           }
-
-          return "$annotations abstract final $type $body";
+          builder.write('();\n');
+          return builder;
         })
         .whereNotNull()
         .join("\n");
