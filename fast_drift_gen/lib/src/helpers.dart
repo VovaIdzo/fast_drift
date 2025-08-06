@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:fast_drift/fast_drift.dart';
 import 'package:fast_drift_gen/src/fast_drift_annotation.dart';
 import 'package:fast_drift_gen/src/fast_drift_table_annotation.dart';
@@ -10,14 +11,15 @@ import 'package:source_gen/source_gen.dart'
 /// Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
 /// The resulting array is sorted by the field name. `Throws` on error.
 List<ConstructorParameterInfo> sortedConstructorFields(
-  ClassElement element,
+  ClassElement2 element,
   String? constructor,
 ) {
-  final targetConstructor = constructor != null
-      ? element.getNamedConstructor(constructor)
-      : element.unnamedConstructor;
 
-  if (targetConstructor is! ConstructorElement) {
+  final targetConstructor = constructor != null
+      ? element.getNamedConstructor2(constructor)
+      : element.unnamedConstructor2;
+
+  if (targetConstructor is! ConstructorElement2) {
     if (constructor != null) {
       throw InvalidGenerationSourceError(
         'Named Constructor "$constructor" constructor is missing.',
@@ -25,16 +27,16 @@ List<ConstructorParameterInfo> sortedConstructorFields(
       );
     } else {
       throw InvalidGenerationSourceError(
-        'Default constructor for "${element.name}" is missing.',
+        'Default constructor for "${element.displayName}" is missing.',
         element: element,
       );
     }
   }
 
-  final parameters = targetConstructor.parameters;
+  final parameters = targetConstructor.formalParameters;
   if (parameters.isEmpty) {
     throw InvalidGenerationSourceError(
-      'Unnamed constructor for ${element.name} has no parameters or missing.',
+      'Unnamed constructor for ${element.displayName} has no parameters or missing.',
       element: element,
     );
   }
@@ -75,10 +77,10 @@ FastDriftAnnotation readClassAnnotation(
 /// If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
 ///
 /// If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
-String typeParametersString(ClassElement classElement, bool nameOnly) {
-  final names = classElement.typeParameters
+String typeParametersString(ClassElement2 classElement, bool nameOnly) {
+  final names = classElement.typeParameters2
       .map(
-        (e) => nameOnly ? e.name : e.getDisplayString(withNullability: true),
+        (e) => nameOnly ? e.name3 : e.displayString2(),
       )
       .join(',');
   if (names.isNotEmpty) {

@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart' show ClassElement, Element;
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:build/build.dart' show BuildStep;
 import 'package:fast_drift/fast_drift.dart';
 import 'package:collection/collection.dart';
@@ -15,28 +16,28 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
   FastDriftGenerator() : super();
 
   @override
-  String generateForAnnotatedElement(
-    Element element,
+  dynamic generateForAnnotatedElement(
+    Element2 element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is! ClassElement) {
+    if (element is! ClassElement2) {
       throw InvalidGenerationSourceError(
         'Only classes can be annotated with "FastDrift". "$element" is not a ClassElement.',
         element: element,
       );
     }
 
-    ClassElement classElement = element;
+    ClassElement2 classElement = element;
     final privacyPrefix = element.isPrivate ? "_" : "";
     final classAnnotation = readClassAnnotation(annotation);
     if (classAnnotation is FastDriftTableAnnotation) {
-      classElement = classAnnotation.type.element! as ClassElement;
+      classElement = classAnnotation.type.element3! as ClassElement2;
     }
     final sortedFields = sortedConstructorFields(classElement, null);
     final typeParametersAnnotation = typeParametersString(classElement, false);
     final typeParametersNames = typeParametersString(classElement, true);
-    final typeAnnotation = classElement.name + typeParametersNames;
+    final typeAnnotation = (classElement.name3 ?? '') + typeParametersNames;
 
     for (final field in sortedFields) {
       if (field.classFieldInfo != null &&
@@ -49,7 +50,7 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
       }
     }
 
-    return _buildTemplate(classElement.name, sortedFields);
+    return _buildTemplate(classElement.name3 ?? '', sortedFields);
   }
 
   String _buildTemplate(
