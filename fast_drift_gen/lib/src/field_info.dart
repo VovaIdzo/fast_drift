@@ -1,7 +1,6 @@
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/element.dart'
-    show ClassElement, FieldElement, ParameterElement;
-import 'package:analyzer/dart/element/element2.dart';
+    show ClassElement, FieldElement, FormalParameterElement;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:fast_drift/fast_drift.dart';
 import 'package:fast_drift_gen/src/fast_drift_id_field_annotation.dart';
@@ -29,17 +28,17 @@ class FieldInfo {
 class ConstructorParameterInfo extends FieldInfo {
   ConstructorParameterInfo(
     FormalParameterElement element,
-    ClassElement2 classElement, {
+    ClassElement classElement, {
     required this.isPositioned,
   })  : idFieldAnnotation = _readIdFieldAnnotation(element, classElement),
-        classFieldInfo = _classFieldInfo(element.name3 ?? '', classElement),
+        classFieldInfo = _classFieldInfo(element.name ?? '', classElement),
         ignoreAnnotation = _readIgnoreFieldAnnotation(element, classElement),
         jsonConverterFieldAnnotation =
             _readJsonConverterFieldAnnotation(element, classElement),
         super(
-          name: element.name3 ?? '',
+          name: element.name ?? '',
           nullable: element.type.nullabilitySuffix != NullabilitySuffix.none,
-          type: element.type.getDisplayString(withNullability: true),
+          type: element.type.getDisplayString(),
         );
 
   final FastDriftIdFieldAnnotation? idFieldAnnotation;
@@ -58,30 +57,30 @@ class ConstructorParameterInfo extends FieldInfo {
   /// Returns the field info for the constructor parameter in the relevant class.
   static FieldInfo? _classFieldInfo(
     String fieldName,
-    ClassElement2 classElement,
+    ClassElement classElement,
   ) {
-    final field = classElement.fields2
-        .where((e) => e.name3 == fieldName)
-        .fold<FieldElement2?>(null, (previousValue, element) => element);
+    final field = classElement.fields
+        .where((FieldElement e) => e.name == fieldName)
+        .fold<FieldElement?>(null, (previousValue, element) => element);
     if (field == null) return null;
 
     return FieldInfo(
-      name: field.name3 ?? '',
+      name: field.name ?? '',
       nullable: field.type.nullabilitySuffix != NullabilitySuffix.none,
-      type: field.type.getDisplayString(withNullability: true),
+      type: field.type.getDisplayString(),
     );
   }
 
   static FastDriftIdFieldAnnotation? _readIdFieldAnnotation(
     FormalParameterElement element,
-    ClassElement2 classElement,
+    ClassElement classElement,
   ) {
-    final fieldElement = classElement.getField2(element.name3 ?? '');
-    if (fieldElement is! FieldElement2) {
+    final fieldElement = classElement.getField(element.name ?? '');
+    if (fieldElement is! FieldElement) {
       return null;
     }
 
-    const checker = TypeChecker.fromRuntime(IdToDrift);
+    final checker = TypeChecker.typeNamed(IdToDrift, inPackage: 'fast_drift');
     final annotation = checker.firstAnnotationOf(fieldElement);
     if (annotation is! DartObject) {
       return null;
@@ -97,14 +96,14 @@ class ConstructorParameterInfo extends FieldInfo {
 
   static FastDriftIgnoreFieldAnnotation? _readIgnoreFieldAnnotation(
     FormalParameterElement element,
-    ClassElement2 classElement,
+    ClassElement classElement,
   ) {
-    final fieldElement = classElement.getField2(element.name3 ?? '');
-    if (fieldElement is! FieldElement2) {
+    final fieldElement = classElement.getField(element.name ?? '');
+    if (fieldElement is! FieldElement) {
       return null;
     }
 
-    const checker = TypeChecker.fromRuntime(IgnoreToDrift);
+    final checker = TypeChecker.typeNamed(IgnoreToDrift, inPackage: 'fast_drift');
     final annotation = checker.firstAnnotationOf(fieldElement);
     if (annotation is! DartObject) {
       return null;
@@ -116,14 +115,14 @@ class ConstructorParameterInfo extends FieldInfo {
   static FastDriftJsonConverterFieldAnnotation?
       _readJsonConverterFieldAnnotation(
     FormalParameterElement element,
-    ClassElement2 classElement,
+    ClassElement classElement,
   ) {
-    final fieldElement = classElement.getField2(element.name3 ?? '');
-    if (fieldElement is! FieldElement2) {
+    final fieldElement = classElement.getField(element.name ?? '');
+    if (fieldElement is! FieldElement) {
       return null;
     }
 
-    const checker = TypeChecker.fromRuntime(JsonToDrift);
+    final checker = TypeChecker.typeNamed(JsonToDrift, inPackage: 'fast_drift');
     final annotation = checker.firstAnnotationOf(fieldElement);
     if (annotation is! DartObject) {
       return null;

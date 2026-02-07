@@ -1,15 +1,12 @@
 import 'package:analyzer/dart/element/element.dart' show ClassElement, Element;
-import 'package:analyzer/dart/element/element2.dart';
 import 'package:build/build.dart' show BuildStep;
 import 'package:fast_drift/fast_drift.dart';
-import 'package:collection/collection.dart';
 import 'package:fast_drift_gen/src/fast_drift_table_annotation.dart';
 import 'package:source_gen/source_gen.dart'
     show ConstantReader, GeneratorForAnnotation, InvalidGenerationSourceError;
 
 import 'field_info.dart';
 import 'helpers.dart';
-import 'package:collection/collection.dart';
 
 /// A `Generator` for `package:build_runner`
 class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
@@ -17,27 +14,23 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
 
   @override
   dynamic generateForAnnotatedElement(
-    Element2 element,
+    Element element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is! ClassElement2) {
+    if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         'Only classes can be annotated with "FastDrift". "$element" is not a ClassElement.',
         element: element,
       );
     }
 
-    ClassElement2 classElement = element;
-    final privacyPrefix = element.isPrivate ? "_" : "";
+    ClassElement classElement = element;
     final classAnnotation = readClassAnnotation(annotation);
     if (classAnnotation is FastDriftTableAnnotation) {
-      classElement = classAnnotation.type.element3! as ClassElement2;
+      classElement = classAnnotation.type.element! as ClassElement;
     }
     final sortedFields = sortedConstructorFields(classElement, null);
-    final typeParametersAnnotation = typeParametersString(classElement, false);
-    final typeParametersNames = typeParametersString(classElement, true);
-    final typeAnnotation = (classElement.name3 ?? '') + typeParametersNames;
 
     for (final field in sortedFields) {
       if (field.classFieldInfo != null &&
@@ -50,7 +43,7 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
       }
     }
 
-    return _buildTemplate(classElement.name3 ?? '', sortedFields);
+    return _buildTemplate(classElement.name ?? '', sortedFields);
   }
 
   String _buildTemplate(
@@ -63,7 +56,7 @@ class FastDriftGenerator extends GeneratorForAnnotation<FastDrift> {
 
           return "${e.name}: Value(item.${e.name})";
         })
-        .whereNotNull()
+        .nonNulls
         .join(",\n");
 
     final jsonConverters = sortedFields
@@ -88,7 +81,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
   @override
   ${e.type} fromSql($driftType fromDb) {
     ${e.nullable ? "if (fromDb == null) return null;" : ""}
-   
+
     return (jsonDecode(fromDb) as List).map((obj) => $pureType.fromJson(obj)).toList();
   }
 
@@ -109,7 +102,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
   @override
   ${e.type} fromSql($driftType fromDb) {
     ${e.nullable ? "if (fromDb == null) return null;" : ""}
-   
+
     return $className.fromJson(jsonDecode(fromDb));
   }
 
@@ -119,10 +112,10 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
 
     return jsonEncode(e.toJson());
   }
-}      
+}
       ''';
         })
-        .whereNotNull()
+        .nonNulls
         .join("\n");
 
     final columns = sortedFields
@@ -146,31 +139,31 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
 
           return "abstract final $type $body";
         })
-        .whereNotNull()
+        .nonNulls
         .join("\n");
 
     return '''
-    
+
 abstract mixin class ${className}FastDrift implements Insertable<${className}> {
   @override
   Map<String, Expression<Object>> toColumns(bool nullToAbsent) {
     final item = this as ${className};
-    
+
     return ${className}TableCompanion(
       $companion
     ).toColumns(nullToAbsent);
   }
-  
+
 }
 
 abstract mixin class ${className}FastDriftTableColumns {
   $columns
-}  
+}
 
 extension ${className}X on ${className} {
   Insertable<${className}> toInsertable([bool nullToAbsent = false]) {
     final item = this as ${className};
-    
+
     return RawValuesInsertable(${className}TableCompanion(
       $companion
     ).toColumns(nullToAbsent));
@@ -181,8 +174,8 @@ extension ${className}ListX on List<${className}> {
   Iterable<Insertable<${className}>> toInsertable([bool nullToAbsent = false]) {
     return map((e) => e.toInsertable(nullToAbsent));
   }
-}  
-   
+}
+
 $jsonConverters
     ''';
   }

@@ -1,5 +1,3 @@
-library fast_drift_gen.builder;
-
 import 'package:build/build.dart' show Builder, BuilderOptions;
 import 'package:fast_drift_gen/src/drift_gen_generator.dart';
 import 'package:source_gen/source_gen.dart' show SharedPartBuilder;

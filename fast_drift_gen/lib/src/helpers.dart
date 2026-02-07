@@ -1,6 +1,5 @@
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
-import 'package:analyzer/dart/element/element2.dart';
 import 'package:fast_drift/fast_drift.dart';
 import 'package:fast_drift_gen/src/fast_drift_annotation.dart';
 import 'package:fast_drift_gen/src/fast_drift_table_annotation.dart';
@@ -11,15 +10,15 @@ import 'package:source_gen/source_gen.dart'
 /// Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
 /// The resulting array is sorted by the field name. `Throws` on error.
 List<ConstructorParameterInfo> sortedConstructorFields(
-  ClassElement2 element,
+  ClassElement element,
   String? constructor,
 ) {
 
   final targetConstructor = constructor != null
-      ? element.getNamedConstructor2(constructor)
-      : element.unnamedConstructor2;
+      ? element.getNamedConstructor(constructor)
+      : element.unnamedConstructor;
 
-  if (targetConstructor is! ConstructorElement2) {
+  if (targetConstructor is! ConstructorElement) {
     if (constructor != null) {
       throw InvalidGenerationSourceError(
         'Named Constructor "$constructor" constructor is missing.',
@@ -60,7 +59,7 @@ List<ConstructorParameterInfo> sortedConstructorFields(
 FastDriftAnnotation readClassAnnotation(
   ConstantReader reader,
 ) {
-  const tableChecker = TypeChecker.fromRuntime(FastDriftTable);
+  final tableChecker = TypeChecker.typeNamed(FastDriftTable, inPackage: 'fast_drift');
   if (reader.instanceOf(tableChecker)) {
     final type = reader.peek('type')?.typeValue;
     if (type == null) {
@@ -77,10 +76,10 @@ FastDriftAnnotation readClassAnnotation(
 /// If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
 ///
 /// If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
-String typeParametersString(ClassElement2 classElement, bool nameOnly) {
-  final names = classElement.typeParameters2
+String typeParametersString(ClassElement classElement, bool nameOnly) {
+  final names = classElement.typeParameters
       .map(
-        (e) => nameOnly ? e.name3 : e.displayString2(),
+        (e) => nameOnly ? e.name : e.displayString,
       )
       .join(',');
   if (names.isNotEmpty) {
