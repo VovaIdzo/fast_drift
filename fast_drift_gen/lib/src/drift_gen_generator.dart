@@ -110,7 +110,7 @@ class ${className}Converter extends TypeConverter<${e.type}, $driftType> {
   $driftType toSql(${e.type} value) {
     ${e.nullable ? "if (value == null) return null;" : ""}
 
-    return jsonEncode(e.toJson());
+    return jsonEncode(value.toJson());
   }
 }
       ''';
